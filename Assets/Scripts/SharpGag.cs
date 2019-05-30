@@ -18,7 +18,6 @@ public class SharpGag {
     string app_id;
     string token;
     string device_uuid;
-    string olderThan;
 
     public SharpGag()
     {
@@ -43,20 +42,20 @@ public class SharpGag {
         return result;
     }
 
-    public string GetPosts(string group = "1", string type = "hot", int count = 5, string entryTypes = "animated",string olderThan = null)
+    public Post[] GetPosts(string group = "1", string type = "hot", int count = 5, string entryTypes = "animated",string olderThan = null)
     {
         WebClient client = new WebClient();
         client.QueryString.Add("group",group);
         client.QueryString.Add("type",type);
-        client.QueryString.Add("itemCounnt",count.ToString());
+        client.QueryString.Add("itemCount",count.ToString());
         client.QueryString.Add("entryTypes", "animated");
 
         if(string.IsNullOrEmpty(olderThan) == false)
         {
             client.QueryString.Add("olderThan",olderThan);
         }
-
-        return MakeRequest(client, API, POST_LIST);
+        string requestResponse = MakeRequest(client, API, POST_LIST);
+        return JsonUtility.FromJson<PostResponse>(requestResponse).data.posts;
     }
 
     string MakeRequest(WebClient client, string APIurl, string APIpath)
@@ -74,7 +73,6 @@ public class SharpGag {
             { "9GAG-REQUEST-SIGNATURE", Sign() }
         };
         client.Headers = webHeaderCollection;
-        //Debug.Log(webHeaderCollection.ToString());
         string url = APIurl + APIpath;
         return client.DownloadString(url);
     }
@@ -126,8 +124,6 @@ public class SharpGag {
     {
         string s1 = GetTimeStamp();
         return GetSha1(s1);
-        //Encoding ISO = Encoding.GetEncoding("ISO-8859-1");
-        //return ISO.GetString(Encoding.Convert(Encoding.UTF8, ISO, Encoding.UTF8.GetBytes(s1)));
     }
 
     public static string[] postSection = new string[] {"Funny","Animals","WTF","Gaming","Awesome","Food & Drinks","Travel","GIF","Cosplay",
@@ -137,4 +133,81 @@ public class SharpGag {
     "Classical Art Memes", "Pic Of The Day","Home Design","Roast Me","Basketball", "Football", "PUBG","Fortnite", "Warhammer",
     "League of Legends","Pokémon","LEGO","Drawing & Illustration","Fan Art " };
     public static string[] postType = new string[] { "Photo", "Animated"};
+}
+[Serializable]
+public class PostResponse
+{
+    public PostData data;
+}
+
+[Serializable]
+public class PostData
+{
+    public Post[] posts;
+}
+
+[Serializable]
+public class Post
+{
+    public string id;
+    public string url;
+    public string status;
+    public string title;
+    public string description;
+    public string type;
+    public int version;
+    public int nsfw;
+    public int upVoteCount;
+    public int downVoteCount;
+    public int totalVoteCount;
+    public int viewsCount;
+    public int score;
+    public int reportedStatus;
+    public int creationTs;
+    public string albumUrl;
+    public int hasImageTitle;
+
+    public int promoted;
+
+    public int isVoteMasked;
+    public int sortTs;
+    public int orderId;
+    public int hasLongPostCover;
+    public PostImages images;
+    public string sourceDomain;
+    public string sourceUrl;
+    public string externalUrl;
+    public string channel;
+    public int isVoted;
+    public int userScore;
+
+    public int commentCount;
+    public int fbShares;
+    public int tweetCount;
+    public string created;
+
+    public string commentOpClientId;
+    public string commentOpSignature;
+    public string commentSystem;
+}
+
+[Serializable]
+public class PostImages
+{
+    public Image image700;
+    public Image image460;
+    public Image image220x145;
+    public Image imageFbThumbnail;
+    public Image image700ba;
+    public Image image460sa;
+    public Image image460sv;
+    public Image image460svm;
+}
+
+[Serializable]
+public class Image
+{
+    public int width;
+    public int height;
+    public string url;
 }
