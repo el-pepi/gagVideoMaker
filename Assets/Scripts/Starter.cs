@@ -14,11 +14,17 @@ public class Starter : MonoBehaviour {
     public RectTransform videoBack;
     public Animator anim;
     public Animator music;
+    public UnityEngine.UI.Image progessBar;
+    public Animator intro;
 
     void Start () {
         SharpGag sharpGag = new SharpGag();
         sharpGag.Login("topfunnyvidsan","pt181179");
         posts = new List<Post>(sharpGag.GetPosts("funny", "hot", 100));
+
+        PostComparer comparer = new PostComparer();
+        posts.Sort(comparer);
+
         foreach(Post p in posts)
         {
             Debug.Log(p.title + ": " + p.images.image460sv.url);
@@ -28,9 +34,18 @@ public class Starter : MonoBehaviour {
         vid.EnableAudioTrack(0, true);
         vid.loopPointReached += OnVideoFinish;
         vid.prepareCompleted += OnVideoPrepaded;
+        StartCoroutine(IntroSequence());
+    }
+
+    IEnumerator IntroSequence()
+    {
+        yield return new WaitForSeconds(0.5f);
+        music.GetComponent<AudioSource>().Play();
+        intro.SetTrigger("Start");
+        yield return new WaitForSeconds(3.5f);
         PlayNextVideo();
     }
-    
+
     void PlayNextVideo()
     {
         vid.url = posts[0].images.image460sv.url;
@@ -47,7 +62,7 @@ public class Starter : MonoBehaviour {
     void OnVideoPrepaded(VideoPlayer vp)
     {
         vid.Play();
-        vid.time = 0.1f;
+        vid.time = 0.2;
         vid.Pause();
         anim.SetTrigger("In");
         StartCoroutine(PlaySequence());
@@ -77,6 +92,16 @@ public class Starter : MonoBehaviour {
         }
     }
 
-    void Update () {
-	}
+    private void Update()
+    {
+        progessBar.fillAmount = (float)vid.frame / (float)vid.frameCount;
+    }
+}
+
+class PostComparer : IComparer<Post>
+{
+    public int Compare(Post a, Post b)
+    {
+        return a.totalVoteCount.CompareTo(b.totalVoteCount);
+    }
 }
