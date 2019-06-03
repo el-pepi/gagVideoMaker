@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using UnityEditor;
 
 public class Starter : MonoBehaviour {
-
     List<Post> posts;
     VideoPlayer vid;
     RenderTexture actualRenderTexture;
@@ -16,24 +16,32 @@ public class Starter : MonoBehaviour {
     public Animator music;
     public UnityEngine.UI.Image progessBar;
     public Animator intro;
+    public Animator outro;
+    public float minutes = 10f;
+    System.DateTime startTime;
+    
+    //public System.Action StopRecording;
 
     void Start () {
+
         SharpGag sharpGag = new SharpGag();
         sharpGag.Login("topfunnyvidsan","pt181179");
-        posts = new List<Post>(sharpGag.GetPosts("funny", "hot", 100));
+        posts = new List<Post>(sharpGag.GetPosts("funny", "hot", 300));
 
         PostComparer comparer = new PostComparer();
         posts.Sort(comparer);
 
         foreach(Post p in posts)
         {
-            Debug.Log(p.title + ": " + p.images.image460sv.url);
+            Debug.Log(p.totalVoteCount + "  " + p.title + ": " + p.images.image460sv.url);
         }
 
         vid = GetComponent<VideoPlayer>();
         vid.EnableAudioTrack(0, true);
         vid.loopPointReached += OnVideoFinish;
         vid.prepareCompleted += OnVideoPrepaded;
+        startTime = System.DateTime.Now;
+        
         StartCoroutine(IntroSequence());
     }
 
@@ -86,15 +94,32 @@ public class Starter : MonoBehaviour {
     {
         music.SetBool("on", true);
         yield return new WaitForSeconds(0.667f);
-        if (posts.Count > 0)
+        if (posts.Count > 0 && GetTimePassed() < minutes)
         {
             PlayNextVideo();
         }
+        else
+        {
+            StartCoroutine(OutroSequence());
+        }
+    }
+
+    IEnumerator OutroSequence()
+    {
+        outro.SetTrigger("Play");
+        yield return new WaitForSeconds(12f);
+
+        EditorApplication.isPlaying = false;
     }
 
     private void Update()
     {
         progessBar.fillAmount = (float)vid.frame / (float)vid.frameCount;
+    }
+
+    double GetTimePassed()
+    {
+       return (startTime - System.DateTime.Now).TotalMinutes;
     }
 }
 
@@ -102,6 +127,6 @@ class PostComparer : IComparer<Post>
 {
     public int Compare(Post a, Post b)
     {
-        return a.totalVoteCount.CompareTo(b.totalVoteCount);
+        return b.totalVoteCount.CompareTo(a.totalVoteCount);
     }
 }
