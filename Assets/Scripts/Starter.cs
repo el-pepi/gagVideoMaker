@@ -26,7 +26,9 @@ public class Starter : MonoBehaviour {
 
         SharpGag sharpGag = new SharpGag();
         sharpGag.Login("topfunnyvidsan","pt181179");
-        posts = new List<Post>(sharpGag.GetPosts("funny", "hot", 300));
+        posts = new List<Post>(sharpGag.GetPosts("funny", "hot", 100));
+        posts.AddRange(sharpGag.GetPosts("funny", "hot", 100, "animated", posts[posts.Count - 1]));
+        posts.AddRange(sharpGag.GetPosts("funny", "hot", 100, "animated", posts[posts.Count - 1]));
 
         PostComparer comparer = new PostComparer();
         posts.Sort(comparer);

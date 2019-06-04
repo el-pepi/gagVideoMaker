@@ -42,7 +42,7 @@ public class SharpGag {
         return result;
     }
 
-    public Post[] GetPosts(string group = "1", string type = "hot", int count = 5, string entryTypes = "animated",string olderThan = null)
+    public Post[] GetPosts(string group = "1", string type = "hot", int count = 5, string entryTypes = "animated",Post olderThan = null)
     {
         WebClient client = new WebClient();
         client.QueryString.Add("group",group);
@@ -50,9 +50,9 @@ public class SharpGag {
         client.QueryString.Add("itemCount",count.ToString());
         client.QueryString.Add("entryTypes", "animated");
 
-        if(string.IsNullOrEmpty(olderThan) == false)
+        if(olderThan != null)
         {
-            client.QueryString.Add("olderThan",olderThan);
+            client.QueryString.Add("olderThan",olderThan.id);
         }
         string requestResponse = MakeRequest(client, API, POST_LIST);
         return JsonUtility.FromJson<PostResponse>(requestResponse).data.posts;

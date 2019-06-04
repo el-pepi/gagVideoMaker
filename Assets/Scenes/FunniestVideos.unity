@@ -6521,7 +6521,7 @@ MonoBehaviour:
   progessBar: {fileID: 106674109}
   intro: {fileID: 1471981268}
   outro: {fileID: 1868841801}
-  minutes: 10
+  minutes: 15
 --- !u!4 &1897716167
 Transform:
   m_ObjectHideFlags: 0
